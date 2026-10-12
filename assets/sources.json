@@ -1,0 +1,34 @@
+[
+  {
+    "name": "three.min.js",
+    "bytes": 669884,
+    "source": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"
+  },
+  {
+    "name": "THREE-LICENSE.txt",
+    "bytes": 1081,
+    "source": "https://cdn.jsdelivr.net/npm/three@0.160.1/LICENSE"
+  },
+  {
+    "name": "earth.jpg",
+    "source": "https://cdn.jsdelivr.net/gh/turban/webgl-earth@master/images/2_no_clouds_4k.jpg",
+    "bytes": 1392914,
+    "credit": "Tom Patterson / Natural Earth III"
+  },
+  {
+    "name": "normal.jpg",
+    "bytes": 336774,
+    "source": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/planets/earth_normal_2048.jpg"
+  },
+  {
+    "name": "specular.jpg",
+    "bytes": 223421,
+    "source": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/planets/earth_specular_2048.jpg"
+  },
+  {
+    "name": "clouds.png",
+    "source": "https://cdn.jsdelivr.net/gh/turban/webgl-earth@master/images/fair_clouds_4k.png",
+    "bytes": 1335262,
+    "processing": "resized to 2048x1024"
+  }
+]
