@@ -26,7 +26,7 @@
   const R = 100, scene = new T.Scene();
   scene.background = new T.Color(0x07121e);
   const camera = new T.PerspectiveCamera(43, 1, 0.1, 2200);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
@@ -39,7 +39,7 @@
       if (hint) hint.textContent = 'Some map detail could not load. Drag to orbit · scroll or pinch to zoom.';
     });
     if (color) tex.colorSpace = T.SRGBColorSpace;
-    tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+    tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     return tex;
   }
   const earthMap = texture(assets.earth, true);
@@ -323,7 +323,7 @@
   },{ passive: false });
   window.WORLD = {
     draw, setView, reset, get view() { return view; }, renderer, scene, camera, aircraft,
-    layers, setLayers, get diagnostics() { return { positionProgress, lat, lon, altitude, mode: view, drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles, frames: drawn, zoom, yaw, pitch, routeDistance: totalDistance, distanceRemaining: totalDistance*(1-positionProgress), contrailSamples, cloudRotation: clouds.rotation.y, reducedMotion, textureReady: !!earthMap && !!earthMap.image, pixelRatio: Math.min(window.devicePixelRatio || 1,1.75) }; }
+    layers, setLayers, get diagnostics() { return { positionProgress, lat, lon, altitude, mode: view, drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles, frames: drawn, zoom, yaw, pitch, routeDistance: totalDistance, distanceRemaining: totalDistance*(1-positionProgress), contrailSamples, cloudRotation: clouds.rotation.y, reducedMotion, textureReady: !!earthMap && !!earthMap.image, pixelRatio: Math.min(window.devicePixelRatio || 1,2) }; }
   };
   const motionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   let reducedMotion = !!(motionQuery && motionQuery.matches), frameHandle = null, timerHandle = null, lastFrameTime = 0, lastSignature = '';

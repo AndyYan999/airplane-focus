@@ -55,8 +55,11 @@ The 3D upgrade passed six automated route tests and real WebGL browser checks: 4
 
 ## Third-party credits
 
+The sharper-view update passed eight automated tests. Browser checks confirmed the displayed Earth texture is 8192×4096, the removed text block is absent, and a 1280×720 Retina viewport renders a 2560×1440 canvas with 8× anisotropic filtering (where supported). Bird’s-eye/globe camera switching and the 390px mobile layout were checked without JavaScript errors. Credits remain here rather than over the flight scenery.
+
 - **Three.js r160.1**: MIT license, reproduced in `vendor/THREE-LICENSE.txt`.
-- **Earth color texture (4096×2048) and cloud texture (2048×1024)**: Tom Patterson / Natural Earth III, retrieved from Bjørn Sandvik’s `webgl-earth` example. Source explanation: [Creating a WebGL Earth with three.js](https://blog.mastermaps.com/2013/09/creating-webgl-earth-with-threejs.html); [Natural Earth III](https://www.shadedrelief.com/natural3/).
+- **Earth color texture (8192×4096)**: NASA Earth Observatory / Reto Stöckli, Blue Marble Next Generation, January 2004, with topography and bathymetry. Downloaded the [21600×10800 original](https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-topography-bathymetry/january/world.topo.bathy.200401.3x21600x10800.jpg) from the [official NASA collection](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography-bathymetry/), downsampled to 8K, and encoded as WebP quality 88. This contains four times the texture pixels of the previous 4K image; it is not an enlargement of that image.
+- **Cloud texture (2048×1024)**: Tom Patterson / Natural Earth III, retrieved from Bjørn Sandvik’s `webgl-earth` example. Source explanation: [Creating a WebGL Earth with three.js](https://blog.mastermaps.com/2013/09/creating-webgl-earth-with-threejs.html); [Natural Earth III](https://www.shadedrelief.com/natural3/).
 - **Earth normal and ocean specular maps**: Three.js r160 example planet textures. Exact download locations for every asset are recorded in `assets/sources.json`.
 - Original Airspace UI, CSS window illustration, procedural airplane geometry, and synthesized cabin audio were implemented for this project.
 

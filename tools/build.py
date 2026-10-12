@@ -9,8 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def build():
     page = (ROOT / 'src/template.html').read_text()
     assets = {}
-    for name, ext in [('earth','jpg'),('normal','jpg'),('specular','jpg'),('clouds','png')]:
-        mime = 'image/png' if ext == 'png' else 'image/jpeg'
+    for name, ext in [('earth','webp'),('normal','jpg'),('specular','jpg'),('clouds','png')]:
+        mime = {'png':'image/png','jpg':'image/jpeg','webp':'image/webp'}[ext]
         assets[name] = f'data:{mime};base64,' + base64.b64encode((ROOT / f'assets/{name}.{ext}').read_bytes()).decode()
     blocks = {
         'IMMERSIVE_CSS': (ROOT / 'src/immersive.css').read_text(),

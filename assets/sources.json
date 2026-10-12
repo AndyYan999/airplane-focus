@@ -10,10 +10,16 @@
     "source": "https://cdn.jsdelivr.net/npm/three@0.160.1/LICENSE"
   },
   {
-    "name": "earth.jpg",
-    "source": "https://cdn.jsdelivr.net/gh/turban/webgl-earth@master/images/2_no_clouds_4k.jpg",
-    "bytes": 1392914,
-    "credit": "Tom Patterson / Natural Earth III"
+    "name": "earth.webp",
+    "source": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-topography-bathymetry/january/world.topo.bathy.200401.3x21600x10800.jpg",
+    "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography-bathymetry/",
+    "source_width": 21600,
+    "source_height": 10800,
+    "width": 8192,
+    "height": 4096,
+    "bytes": 3675444,
+    "credit": "NASA Earth Observatory / Reto St\u00f6ckli, Blue Marble Next Generation, January 2004",
+    "processing": "Downsampled from 21600x10800 NASA original using Lanczos; WebP quality 88. No enlargement of the old 4K texture."
   },
   {
     "name": "normal.jpg",
