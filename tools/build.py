@@ -18,6 +18,8 @@ def build():
         'WORLD_ASSETS': 'window.WORLD_ASSETS=' + json.dumps(assets,separators=(',',':')) + ';',
         'FLIGHT_MATH': (ROOT / 'src/flight-math.js').read_text(),
         'WORLD': (ROOT / 'src/world.js').read_text(),
+        'SATELLITE_MATH': (ROOT / 'src/satellite-math.js').read_text(),
+        'SATELLITE': (ROOT / 'src/satellite.js').read_text(),
     }
     for name, text in blocks.items():
         token = f'/*__{name}__*/'
@@ -25,7 +27,7 @@ def build():
             raise ValueError(f'Expected exactly one {token} placeholder')
         page = page.replace(token, text)
     (ROOT / 'index.html').write_text(page)
-    print(f'Built index.html: {len(page.encode()):,} bytes; all rendering code and textures embedded.')
+    print(f'Built index.html: {len(page.encode()):,} bytes; renderer and offline textures embedded, HD imagery streamed on demand.')
 
 if __name__ == '__main__':
     build()

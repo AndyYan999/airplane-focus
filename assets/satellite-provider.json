@@ -1,0 +1,21 @@
+{
+  "provider": "EOX IT Services GmbH",
+  "product": "EOxCloudless / Sentinel-2 cloudless 2025",
+  "layer": "s2cloudless-2025_3857",
+  "tile_template": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg",
+  "matrix_set": "g",
+  "tile_pixels": 256,
+  "detail_zoom": 14,
+  "maximum_visible_detail_tiles": 25,
+  "maximum_visible_background_tiles": 36,
+  "cache_limit": 160,
+  "concurrent_request_limit": 4,
+  "minimum_request_interval_ms": 180,
+  "capabilities": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml",
+  "license": "CC BY-NC-SA 4.0, non-commercial use",
+  "license_url": "https://cloudless.eox.at/license-non-commercial",
+  "required_credit": "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025)",
+  "imagery_date": "2025 mosaic; not real-time imagery",
+  "offline_fallback": "Embedded NASA 8K Earth texture",
+  "notes": "Tiles are requested only for the visible virtual flight view. No API key, paid account, bulk prefetch, or device location permission. Attribution remains visible while imagery is displayed."
+}

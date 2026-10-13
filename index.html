@@ -10,17 +10,20 @@ body{background:#050b13;min-height:100svh;overflow:hidden}#worldStage{position:f
 .boarding-footer p{display:none}
 .ticket{padding:18px 20px}.ticket-top{padding-bottom:10px}.route{margin:12px 0 15px}.task-row{margin-top:12px}.ticket label{margin-bottom:6px}.boarding-footer{margin-top:14px;padding-top:10px}
 @media(max-width:680px){.hint{max-width:none;line-height:1.3}#telemetry{top:285px}.world-disclaimer{display:none}.telemetry-item strong{font-size:10px}.telemetry-item small{font-size:8px}.telemetry-values{gap:15px}}
+.satellite-controls{display:flex;align-items:center;gap:12px;pointer-events:auto;margin-top:10px}.satellite-controls button{min-height:38px;font-size:10px;padding:8px 12px;background:#07111bb0}.satellite-controls button[aria-pressed=true]{color:var(--accent);border-color:#b393644d}#satelliteState{font-size:10px;color:#b1c5d2;max-width:190px;line-height:1.5}#satelliteCredit{position:fixed;z-index:4;left:26px;bottom:10px;font-size:10px;line-height:1.5;color:#c3d0da;background:#07111bd9;padding:6px 8px;border-radius:4px;max-width:calc(100vw - 435px)}#satelliteCredit[hidden]{display:none}#satelliteCredit a{color:#c3d0da;text-decoration:none}.satellite-visible #telemetry{bottom:70px}
+@media(max-width:680px){.satellite-controls{margin-top:3px;gap:9px}.satellite-controls button{min-height:44px;font-size:9px}.satellite-controls #satelliteState{font-size:9px;max-width:175px}#satelliteCredit{left:12px;bottom:5px;max-width:calc(100vw - 24px);font-size:9px;line-height:1.35;padding:5px 6px}.satellite-visible .ticket{bottom:121px}.satellite-visible .below{bottom:48px}.satellite-visible #telemetry{display:none;top:274px;bottom:auto}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
 </style></head><body>
 <div id="worldStage"><canvas id="worldCanvas" tabindex="0" aria-label="Interactive 3D Earth and airplane. Drag to orbit and scroll to zoom."></canvas><div id="worldError" class="hidden" role="status"></div></div>
-<aside id="worldHud" aria-label="Camera controls"><p class="world-title">AIRSPACE / EARTH OBSERVATION</p><div class="view-switch"><button id="followView" aria-pressed="true">Bird’s-eye</button><button id="globeView" aria-pressed="false">Earth view</button><button id="recenterView" title="Recenter camera" aria-label="Recenter camera">↺</button></div><div class="world-settings"><button id="worldDay" aria-pressed="true">Daylight</button><button id="worldNight" aria-pressed="false">Night</button><button id="fullscreenView" aria-label="Toggle browser fullscreen">Full screen ↗</button></div><p id="worldHint">Drag to orbit · scroll or pinch to zoom</p></aside>
+<aside id="worldHud" aria-label="Camera controls"><p class="world-title">AIRSPACE / EARTH OBSERVATION</p><div class="view-switch"><button id="followView" aria-pressed="true">Bird’s-eye</button><button id="globeView" aria-pressed="false">Earth view</button><button id="recenterView" title="Recenter camera" aria-label="Recenter camera">↺</button></div><div class="world-settings"><button id="worldDay" aria-pressed="true">Daylight</button><button id="worldNight" aria-pressed="false">Night</button><button id="fullscreenView" aria-label="Toggle browser fullscreen">Full screen ↗</button></div><div class="satellite-controls"><button id="satelliteToggle" aria-pressed="true">HD satellite · on</button><span id="satelliteState" role="status">Loading Sentinel-2 imagery…</span></div><p id="worldHint">Drag to orbit · scroll or pinch to zoom</p></aside>
 <aside id="telemetry" aria-label="Simulated flight position"><p class="telemetry-label">FOLLOWING YOUR FOCUS FLIGHT</p><div class="telemetry-values"><div class="telemetry-item"><strong id="worldPosition">—</strong><small>Position</small></div><div class="telemetry-item"><strong id="worldDistance">—</strong><small>Route remaining</small></div><div class="telemetry-item"><strong id="worldAltitude">—</strong><small>Simulated altitude</small></div></div></aside>
+<div id="satelliteCredit" hidden><a href="https://cloudless.eox.at/" target="_blank" rel="noopener">EOxCloudless</a> by <a href="https://eox.at/" target="_blank" rel="noopener">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2025) · <a href="https://maps.eox.at/" target="_blank" rel="noopener">EOX::Maps</a></div>
 <header><div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M30 13 18 11V3c0-3-4-3-4 0v8L2 13v3l12-1v10l-5 3v2l7-2 7 2v-2l-5-3V15l12 1z"/></svg>airspace</div><div class="header-right"><span class="status" id="headerStatus">A LITTLE DISTANCE FROM DISTRACTION</span><button id="logButton">Flight log ↗</button></div></header>
 <main><section class="intro"><div><div class="eyebrow">Your attention, cleared for takeoff</div><h1 id="headline">Somewhere above the noise.</h1></div><p>A window seat. One task. A little time.</p></section><div class="layout"><section class="window-scene" id="scene" aria-label="Illustrated airplane window with clouds and an aircraft wing"><span class="cabin-label">WINDOW SEAT · 12A</span><div class="scene-controls"><button id="dayButton" aria-pressed="true">Golden hour</button><button id="nightButton" aria-pressed="false">Night flight</button></div><div class="window-shell"><div class="window-inner"><div class="sky"></div><div class="sun"></div><div class="cloud-layer far"></div><div class="cloud-layer"></div><div class="wing"></div><div class="window-shine"></div></div></div><div class="scene-caption"><span id="sceneCaption">MAKE ROOM FOR A CLEARER MIND</span><span>NO CONNECTION REQUIRED</span></div></section>
 <section class="ticket" aria-label="Focus flight controls"><div class="ticket-top"><span class="eyebrow" id="ticketLabel">Boarding pass / focus flight</span><span class="seat">AIRSPACE · 12A</span></div><div class="route"><div class="airport"><strong id="originCode">SZX</strong><small id="originName">Shenzhen</small></div><div class="route-art"><span aria-hidden="true">✈</span></div><div class="airport"><strong id="destinationCode">HND</strong><small id="destinationName">Tokyo</small></div></div>
 <form id="boarding"><div class="form-grid"><div><label for="origin">Depart from</label><select id="origin"></select></div><div><label for="destination">Arrive in</label><select id="destination"></select></div></div><div class="task-row"><label for="task">What are you working on?</label><input id="task" maxlength="100" placeholder="One task to carry with you…" autocomplete="off"></div><div class="task-row"><label for="minutes">Flight time · minutes</label><div class="duration-row"><button type="button" class="selected" data-minutes="25">25</button><button type="button" data-minutes="50">50</button><button type="button" data-minutes="90">90</button><input class="custom" id="minutes" type="number" min="1" max="240" value="25" required aria-label="Custom focus duration in minutes"></div></div><div class="boarding-footer"><button type="submit" class="primary"><span>Board your flight</span><span aria-hidden="true">↗</span></button><p>Flight time is your focus time, not the real route duration.<br>Settle in. Your only destination is the task in front of you.</p></div></form>
-<div id="flight" class="hidden"><div class="timer-wrap"><div class="phase" id="phase">Taking off</div><div class="timer" id="timer" role="timer" aria-label="Time remaining">25:00</div><div class="task-caption" id="taskCaption">Uninterrupted focus</div><div class="progress"><div class="progress-fill" id="progressFill"></div><span class="progress-plane" id="progressPlane" aria-hidden="true">✈</span></div><div class="progress-labels"><span id="departLabel">SZX · DEPARTURE</span><span id="percent">0%</span><span id="arriveLabel">HND · ARRIVAL</span></div><div class="flight-actions"><button class="primary" id="pauseButton">Pause flight</button><button id="endButton">End flight</button><button id="immersiveButton" title="Hide interface (F)" aria-label="Toggle immersive view">⛶</button></div><p class="flight-note" id="flightNote">You’re offline by choice. Stay with one thing.</p></div></div>
+<div id="flight" class="hidden"><div class="timer-wrap"><div class="phase" id="phase">Taking off</div><div class="timer" id="timer" role="timer" aria-label="Time remaining">25:00</div><div class="task-caption" id="taskCaption">Uninterrupted focus</div><div class="progress"><div class="progress-fill" id="progressFill"></div><span class="progress-plane" id="progressPlane" aria-hidden="true">✈</span></div><div class="progress-labels"><span id="departLabel">SZX · DEPARTURE</span><span id="percent">0%</span><span id="arriveLabel">HND · ARRIVAL</span></div><div class="flight-actions"><button class="primary" id="pauseButton">Pause flight</button><button id="endButton">End flight</button><button id="immersiveButton" title="Hide interface (F)" aria-label="Toggle immersive view">⛶</button></div><p class="flight-note" id="flightNote">Your attention is here. Stay with one thing.</p></div></div>
 </section></div><div class="below"><div class="sound"><button id="soundButton" aria-pressed="false">Cabin sound · off</button><label for="volume" class="sr-only">Cabin volume</label><input class="volume" id="volume" type="range" min="0" max="100" value="35"><small>Headphones recommended</small></div><span class="hint"><kbd>Space</kbd> pause &nbsp; <kbd>F</kbd> quiet view</span></div><footer class="footer"><span>NOT EVERY JOURNEY NEEDS TO GO FAR.</span><span>Your flight log stays on this device.</span></footer></main>
 <dialog id="logDialog"><div class="dialog-head"><h2>Your flight log</h2><button id="closeLog" aria-label="Close flight log">×</button></div><p id="logSummary" class="log-summary"></p><div id="logEntries"></div></dialog><dialog id="endDialog"><h2>Return to the gate?</h2><p>Your flight will end early. Only completed flights are added to your log.</p><div class="flight-actions"><button id="keepFlying" class="primary">Keep flying</button><button id="confirmEnd">End flight</button></div></dialog><div class="sr-only" id="announcement" aria-live="polite"></div><div id="toast" class="toast hidden" role="status"></div>
 <script>
@@ -34,7 +37,7 @@ function airport(code){return airports.find(a=>a.code===code)}
 function route(){const a=airport(state.origin),b=airport(state.destination);$('originCode').textContent=a.code;$('originName').textContent=a.name;$('destinationCode').textContent=b.code;$('destinationName').textContent=b.name;$('departLabel').textContent=a.code+' · DEPARTURE';$('arriveLabel').textContent=b.code+' · ARRIVAL'}
 function format(ms){const secs=Math.ceil(ms/1000);return String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0')}
 function phase(p){return p<.08?'Taking off':p<.87?'At cruising altitude':'Preparing to land'}
-function render(){const active=state.status!=='idle',running=state.status==='running',terminal=['done','ended'].includes(state.status),p=Math.max(0,Math.min(1,1-state.remaining/state.duration));$('boarding').classList.toggle('hidden',active);$('flight').classList.toggle('hidden',!active);document.body.classList.toggle('flying',running);$('scene').classList.toggle('night',state.theme==='night');$('dayButton').setAttribute('aria-pressed',String(state.theme==='day'));$('nightButton').setAttribute('aria-pressed',String(state.theme==='night'));route();$('timer').textContent=state.status==='ended'?'—:—':format(state.remaining);$('phase').textContent=state.status==='paused'?'Flight paused':state.status==='done'?'Welcome to your destination':state.status==='ended'?'Returned to the gate':phase(p);$('taskCaption').textContent=state.task||'Uninterrupted focus';$('progressFill').style.width=p*100+'%';$('progressPlane').style.left=p*100+'%';$('percent').textContent=Math.floor(p*100)+'%';$('pauseButton').textContent=terminal?'Book another flight':state.status==='paused'?'Resume flight':'Pause flight';$('endButton').classList.toggle('hidden',terminal);$('ticketLabel').textContent=active?'Focus flight / '+state.status:'Boarding pass / focus flight';$('headline').textContent=state.status==='done'?'A little further than before.':state.status==='ended'?'Another departure awaits.':'Somewhere above the noise.';$('headerStatus').textContent=running?'FOCUS FLIGHT IN PROGRESS':state.status==='paused'?'YOUR WINDOW SEAT IS WAITING':'A LITTLE DISTANCE FROM DISTRACTION';$('sceneCaption').textContent=running?'NOTHING TO DO BUT THE THING YOU CAME FOR':'MAKE ROOM FOR A CLEARER MIND';$('flightNote').textContent=state.status==='done'?'Flight complete. Stretch, drink some water, enjoy the view.':state.status==='ended'?'No pressure. Return when you’re ready for another journey.':state.status==='paused'?'Take a breath. Your remaining focus time is saved.':'You’re offline by choice. Stay with one thing.';document.title=active&&!terminal?format(state.remaining)+' · Airspace':'Airspace — a little distance from distraction'}
+function render(){const active=state.status!=='idle',running=state.status==='running',terminal=['done','ended'].includes(state.status),p=Math.max(0,Math.min(1,1-state.remaining/state.duration));$('boarding').classList.toggle('hidden',active);$('flight').classList.toggle('hidden',!active);document.body.classList.toggle('flying',running);$('scene').classList.toggle('night',state.theme==='night');$('dayButton').setAttribute('aria-pressed',String(state.theme==='day'));$('nightButton').setAttribute('aria-pressed',String(state.theme==='night'));route();$('timer').textContent=state.status==='ended'?'—:—':format(state.remaining);$('phase').textContent=state.status==='paused'?'Flight paused':state.status==='done'?'Welcome to your destination':state.status==='ended'?'Returned to the gate':phase(p);$('taskCaption').textContent=state.task||'Uninterrupted focus';$('progressFill').style.width=p*100+'%';$('progressPlane').style.left=p*100+'%';$('percent').textContent=Math.floor(p*100)+'%';$('pauseButton').textContent=terminal?'Book another flight':state.status==='paused'?'Resume flight':'Pause flight';$('endButton').classList.toggle('hidden',terminal);$('ticketLabel').textContent=active?'Focus flight / '+state.status:'Boarding pass / focus flight';$('headline').textContent=state.status==='done'?'A little further than before.':state.status==='ended'?'Another departure awaits.':'Somewhere above the noise.';$('headerStatus').textContent=running?'FOCUS FLIGHT IN PROGRESS':state.status==='paused'?'YOUR WINDOW SEAT IS WAITING':'A LITTLE DISTANCE FROM DISTRACTION';$('sceneCaption').textContent=running?'NOTHING TO DO BUT THE THING YOU CAME FOR':'MAKE ROOM FOR A CLEARER MIND';$('flightNote').textContent=state.status==='done'?'Flight complete. Stretch, drink some water, enjoy the view.':state.status==='ended'?'No pressure. Return when you’re ready for another journey.':state.status==='paused'?'Take a breath. Your remaining focus time is saved.':'Your attention is here. Stay with one thing.';document.title=active&&!terminal?format(state.remaining)+' · Airspace':'Airspace — a little distance from distraction'}
 async function wake(){try{if('wakeLock' in navigator&&state.status==='running'){wakeLock=await navigator.wakeLock.request('screen')}}catch(e){}}
 function release(){if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null}}
 function finish(){if(state.status!=='running')return;state.remaining=0;state.status='done';state.deadline=null;log.unshift({id:Date.now(),origin:state.origin,destination:state.destination,task:state.task,minutes:state.duration/60000,finished:new Date().toISOString()});log=log.slice(0,100);save();release();chime();$('announcement').textContent='Flight complete. You have arrived in '+airport(state.destination).name+'.';render()}
@@ -73,6 +76,96 @@ window.FLIGHT_MATH={airports,vector,coordinates,pointAt,progress,distance,altitu
 })();
 </script>
 <script>(()=>{const $=id=>document.getElementById(id);['Day','Night'].forEach(mode=>{$('world'+mode).addEventListener('click',()=>$(mode.toLowerCase()+'Button').click())});function sync(){$('worldDay').setAttribute('aria-pressed',String(TOOL.state.theme==='day'));$('worldNight').setAttribute('aria-pressed',String(TOOL.state.theme==='night'))}sync();setInterval(sync,300);$('fullscreenView').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else throw new Error('Unsupported')}catch(e){document.getElementById('worldHint').textContent='Use your browser’s full-screen command for this view.'}});document.addEventListener('fullscreenchange',()=>{$('fullscreenView').textContent=document.fullscreenElement?'Exit full screen ↙':'Full screen ↗'});})();</script>
+<script>(()=>{'use strict';const rad=Math.PI/180,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function tile(lat,lon,z){const n=2**z,p=clamp(lat,-85.05112878,85.05112878)*rad;return {x:Math.floor((lon+180)/360*n),y:clamp(Math.floor((1-Math.asinh(Math.tan(p))/Math.PI)/2*n),0,n-1),z}}
+function lon(x,z){return x/(2**z)*360-180}
+function lat(y,z){return Math.atan(Math.sinh(Math.PI*(1-2*y/(2**z))))/rad}
+function bounds(x,y,z){return {west:lon(x,z),east:lon(x+1,z),north:lat(y,z),south:lat(y+1,z)}}
+function plan(b,maxZoom=14,maxTiles=64){let z=maxZoom,a,c;for(;z>=2;z--){a=tile(b.north,b.west,z);c=tile(b.south,b.east,z);if((c.x-a.x+1)*(c.y-a.y+1)<=maxTiles)break}const n=2**z,tiles=[];for(let y=a.y;y<=c.y;y++)for(let rawX=a.x;rawX<=c.x;rawX++){const x=((rawX%n)+n)%n;tiles.push({x,y,z,rawX,key:z+'/'+y+'/'+x})}return {zoom:z,tiles}}
+function follow(alt,zoom,hd){return hd?{radius:100+.0125+alt*100/6371,scale:.0025,distance:.075*zoom,near:.0001,ahead:.0033}:{radius:101+alt*.05,scale:.45,distance:16*zoom,near:.1,ahead:.65}}
+function meters(latitude,z){return 40075016.686*Math.cos(latitude*rad)/(2**z*256)}
+function detail(latitude,longitude,z=14){const c=tile(latitude,longitude,z),n=2**z,out=[];for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const y=c.y+dy;if(y<0||y>=n)continue;const rawX=c.x+dx,x=((rawX%n)+n)%n;out.push({x,y,z,rawX,key:z+'/'+y+'/'+x})}return out}
+window.SATELLITE_MATH={tile,lon,lat,bounds,plan,follow,meters,detail};})();
+</script>
+<script>/* Optional online imagery: EOX Sentinel-2 cloudless 2025, non-commercial use. */
+(()=>{'use strict';
+window.createSatelliteLayer=function(T,scene,renderer,onChange){
+ const M=window.SATELLITE_MATH,$=id=>document.getElementById(id),R=100;
+ const SOURCE='https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/';
+ const group=new T.Group();group.name='satellite-imagery';scene.add(group);
+ const cache=new Map(),sphere=new T.Sphere(new T.Vector3(),R),ray=new T.Raycaster(),hit=new T.Vector3();
+ let enabled=true,unavailable=false,offline=!navigator.onLine,queue=[],pending=0,totalLoaded=0,failed=0,currentZoom=14,visibleLoaded=0,wanted=new Set(),lastPlan=0,lastRequest=0,pumpTimer=null,lastMode='follow',lastLat=0,lastTheme='day',disposed=false,allowed=true,detailLoaded=0,backgroundZoom=14;
+ try{enabled=localStorage.getItem('airspace-hd-satellite')!=='off'}catch(e){}
+ function inform(){
+  const active=allowed&&enabled&&!offline&&!unavailable&&lastMode==='follow';group.visible=active;
+  visibleLoaded=detailLoaded=0;for(const [key,t] of cache){if(t.mesh){t.mesh.visible=active&&wanted.has(key);if(t.mesh.visible){visibleLoaded++;if(t.z===14)detailLoaded++}}}
+  const hasVisible=visibleLoaded>0;
+  const credit=$('satelliteCredit');if(credit)credit.hidden=!hasVisible;
+  document.body.classList.toggle('satellite-visible',hasVisible);
+  const btn=$('satelliteToggle');if(btn){btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'HD satellite · on':'HD satellite · off'}
+  const label=$('satelliteState');let text=!enabled?'Offline Earth texture':lastMode==='globe'?'Global Earth view':offline||unavailable?'Satellite unavailable · offline Earth':hasVisible?'Sentinel-2 · '+M.meters(lastLat,detailLoaded?14:backgroundZoom).toFixed(0)+' m / pixel detail'+(pending?' · loading…':''):'Loading Sentinel-2 imagery…';
+  if(label&&label.textContent!==text)label.textContent=text;
+ }
+ function disposeEntry(t){t.status='disposed';if(t.mesh){group.remove(t.mesh);t.mesh.geometry.dispose();t.mesh.material.map.dispose();t.mesh.material.dispose()}if(t.timer)clearTimeout(t.timer)}
+ function trim(){if(cache.size<=160)return;const candidates=[...cache].filter(([k,t])=>!wanted.has(k)&&t.status!=='loading').sort((a,b)=>a[1].used-b[1].used);for(const [k,t] of candidates){if(cache.size<=160)break;disposeEntry(t);cache.delete(k)}}
+ function geometry(t){
+  const segments=8,vertices=[],uv=[],index=[];const n=2**t.z,r=R+.00025+t.z*.00001;
+  for(let j=0;j<=segments;j++)for(let i=0;i<=segments;i++){
+   const lon=M.lon(t.x+i/segments,t.z)*Math.PI/180,lat=M.lat(t.y+j/segments,t.z)*Math.PI/180;
+   vertices.push(r*Math.cos(lat)*Math.cos(lon),r*Math.sin(lat),-r*Math.cos(lat)*Math.sin(lon));uv.push(i/segments,1-j/segments);
+   if(i<segments&&j<segments){const a=j*(segments+1)+i;index.push(a,a+segments+1,a+1,a+1,a+segments+1,a+segments+2)}
+  }
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(index);g.computeBoundingSphere();return g;
+ }
+ function load(t){
+  t.status='loading';pending++;lastRequest=performance.now();const img=new Image();img.crossOrigin='anonymous';let settled=false;
+  function done(ok){if(settled)return;settled=true;clearTimeout(t.timer);pending--;t.status=ok?'ready':'failed';t.used=performance.now();
+   if(ok){const tex=new T.Texture(img);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());tex.needsUpdate=true;
+    const material=new T.MeshBasicMaterial({map:tex,color:lastTheme==='night'?0x7191b3:0xffffff,side:T.DoubleSide,toneMapped:false});t.mesh=new T.Mesh(geometry(t),material);t.mesh.name='sentinel-'+t.key;t.mesh.renderOrder=t.z;group.add(t.mesh);totalLoaded++;
+   }else{failed++;if(totalLoaded===0&&failed>=6){unavailable=true;queue=[]}}
+   inform();trim();onChange();pump();
+  }
+  img.onload=()=>done(true);img.onerror=()=>done(false);t.timer=setTimeout(()=>{done(false);img.src=''},12000);img.src=SOURCE+t.z+'/'+t.y+'/'+t.x+'.jpg';
+ }
+ function pump(){
+  if(disposed||!enabled||offline||unavailable||lastMode!=='follow'||document.hidden)return;
+  queue=queue.filter(t=>wanted.has(t.key)&&t.status==='queued');
+  if(!queue.length||pending>=4)return;
+  const gap=180-(performance.now()-lastRequest);
+  if(gap>0){if(pumpTimer===null)pumpTimer=setTimeout(()=>{pumpTimer=null;pump()},gap);return}
+  load(queue.shift());if(queue.length)pump();
+ }
+ function footprint(camera,latitude,longitude,aircraft){
+  camera.updateMatrixWorld();const points=[];
+  for(const x of [-1,0,1])for(const y of [-1,0,1]){ray.setFromCamera(new T.Vector2(x,y),camera);if(ray.ray.intersectSphere(sphere,hit)){let lon=Math.atan2(-hit.z,hit.x)*180/Math.PI;lon=longitude+((lon-longitude+540)%360)-180;points.push({lat:Math.asin(hit.y/R)*180/Math.PI,lon})}}
+  if(!points.length)return {west:longitude-.04,east:longitude+.04,north:latitude+.04,south:latitude-.04};
+  const b={west:Math.min(...points.map(p=>p.lon)),east:Math.max(...points.map(p=>p.lon)),north:Math.max(...points.map(p=>p.lat)),south:Math.min(...points.map(p=>p.lat))};
+  const padLon=(b.east-b.west)*.08+.002,padLat=(b.north-b.south)*.08+.002;
+  b.west-=padLon;b.east+=padLon;b.north=Math.min(85,b.north+padLat);b.south=Math.max(-85,b.south-padLat);
+  b.detailLat=latitude;b.detailLon=longitude;if(aircraft){const f=aircraft.position.clone().project(camera);ray.setFromCamera(new T.Vector2(f.x,f.y),camera);if(ray.ray.intersectSphere(sphere,hit)){b.detailLat=Math.asin(hit.y/R)*180/Math.PI;b.detailLon=Math.atan2(-hit.z,hit.x)*180/Math.PI}}return b;
+ }
+ function update({view,camera,lat,lon,state,aircraft,visible=true}){
+  lastMode=view;lastLat=lat;allowed=visible;group.visible=visible&&enabled&&!offline&&!unavailable&&view==='follow';
+  if(state.theme!==lastTheme){lastTheme=state.theme;for(const t of cache.values())if(t.mesh)t.mesh.material.color.set(lastTheme==='night'?0x7191b3:0xffffff)}
+  if(!group.visible){for(const t of cache.values())if(t.mesh)t.mesh.visible=false;inform();group.visible=false;return}
+  const now=performance.now();if(now-lastPlan<250){pump();return}lastPlan=now;
+  const b=footprint(camera,lat,lon,aircraft),plan=M.plan(b,state.status==='running'?13:14,36);backgroundZoom=plan.zoom;
+  const detail=plan.zoom<14?M.detail(b.detailLat??lat,b.detailLon??lon):[];currentZoom=detail.length?14:plan.zoom;
+  const center=M.tile(lat,lon,plan.zoom);plan.tiles.sort((a,b)=>(a.rawX-center.x)**2+(a.y-center.y)**2-((b.rawX-center.x)**2+(b.y-center.y)**2));
+  const near=M.tile(b.detailLat??lat,b.detailLon??lon,14);detail.sort((a,b)=>(a.rawX-near.x)**2+(a.y-near.y)**2-((b.rawX-near.x)**2+(b.y-near.y)**2));
+  const tiles=[...new Map([...detail,...plan.tiles].map(t=>[t.key,t])).values()];wanted=new Set(tiles.map(t=>t.key));
+  for(const t of tiles){let entry=cache.get(t.key);if(!entry){entry={...t,status:'queued',used:now};cache.set(t.key,entry);queue.push(entry)}else entry.used=now}
+  inform();trim();pump();
+ }
+ function retryFailed(){for(const [key,t] of cache)if(t.status==='failed'||t.status==='queued'){t.status='disposed';cache.delete(key)}}
+ function setEnabled(value){enabled=!!value;unavailable=false;failed=0;if(enabled)retryFailed();lastPlan=0;try{localStorage.setItem('airspace-hd-satellite',enabled?'on':'off')}catch(e){}inform();onChange()}
+ const toggle=$('satelliteToggle');if(toggle)toggle.addEventListener('click',()=>setEnabled(!enabled));
+ window.addEventListener('offline',()=>{offline=true;inform();onChange()});window.addEventListener('online',()=>{offline=false;unavailable=false;failed=0;retryFailed();lastPlan=0;inform();onChange()});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastPlan=0;onChange();pump()}});
+ const api={update,setEnabled,group,get enabled(){return enabled},get localView(){return enabled&&!offline&&!unavailable},get diagnostics(){return {enabled,offline,unavailable,mode:lastMode,zoom:currentZoom,backgroundZoom,detailTiles:detailLoaded,visibleTiles:visibleLoaded,loading:pending,queued:queue.filter(t=>wanted.has(t.key)&&t.status==='queued').length,cacheSize:cache.size,totalLoaded,failed,metersPerPixel:M.meters(lastLat,currentZoom),provider:'EOX Sentinel-2 cloudless 2025',tileUrl:SOURCE}}};
+ window.SATELLITE=api;inform();return api;
+};})();
+</script>
 <script>/* Offline Earth renderer. THREE and flight math are supplied by the bundle. */
 (() => {
   'use strict';
@@ -267,15 +360,17 @@ window.FLIGHT_MATH={airports,vector,coordinates,pointAt,progress,distance,altitu
   function updateTrails(s, progress) {
     contrails.visible = layers.plane && (s.status === 'running' || s.status === 'paused') && progress > .003 && progress < .999;
     if (!contrails.visible) { contrailSamples = 0; return; }
-    const key = routeKey+':'+progress.toFixed(7)+':'+view;
+    const key = routeKey+':'+progress.toFixed(7)+':'+view+':'+(satellite&&satellite.localView);
     contrailSamples = (trailSegments+1)*2;
     if (key === trailKey) return; trailKey = key;
-    const span = Math.min(progress,.075), visualScale = view === 'globe' ? .74 : .45;
+    const local=view==='follow'&&satellite&&satellite.localView;
+    const span = Math.min(progress,local?Math.min(.075,12/Math.max(1,totalDistance)):.075), visualScale = view === 'globe' ? .74 : local?.0025:.45;
     for (let i = 0; i <= trailSegments; i++) {
       const fraction = i/trailSegments, t = progress-span*(1-fraction), f = flightFrame(s,t);
       const math = window.FLIGHT_MATH, height = math ? math.altitude(t) : 11;
-      const center = f.up.clone().multiplyScalar(R+1+height*.05).addScaledVector(f.forward,-visualScale*.95);
-      const width = .02+(1-fraction)*.14;
+      const radius=local?R+.0125+height*R/6371:R+1+height*.05;
+      const center = f.up.clone().multiplyScalar(radius).addScaledVector(f.forward,-visualScale*.95);
+      const width = local?.00005+(1-fraction)*.0006:.02+(1-fraction)*.14;
       for (const mesh of trailMeshes) {
         const pos = mesh.geometry.attributes.position;
         const middle = center.clone().addScaledVector(f.right,mesh.userData.side*visualScale*1.65);
@@ -288,6 +383,7 @@ window.FLIGHT_MATH={airports,vector,coordinates,pointAt,progress,distance,altitu
   }
   let view = 'follow', lastTheme = '', drawn = 0, positionProgress = 0, altitude = 0, lat = 0, lon = 0;
   let lastLabel = 0, lastLabelKey = '', yaw = 0, pitch = 0, zoom = 1;
+  const satellite=window.createSatelliteLayer?window.createSatelliteLayer(T,scene,renderer,()=>draw()):null;
   function text(id, value) { const el = $(id); if (el && el.textContent !== value) el.textContent = value; }
   function updateFlight(now) {
     const s = stateNow(), math = window.FLIGHT_MATH;
@@ -297,8 +393,14 @@ window.FLIGHT_MATH={airports,vector,coordinates,pointAt,progress,distance,altitu
     altitude = Math.max(0,math ? math.altitude(positionProgress) : 11*Math.min(1,positionProgress/.08,(1-positionProgress)/.12));
     const frame = flightFrame(s,positionProgress);
     // Plane size and clearance are intentionally illustrative, not geospatial scale.
-    aircraft.position.copy(frame.up).multiplyScalar(R + 1.0 + altitude*.05);
-    aircraft.quaternion.copy(frame.quaternion); aircraft.scale.setScalar(view === 'globe' ? .74 : .45);
+    const local=view==='follow'&&satellite&&satellite.localView;
+    const follow=window.SATELLITE_MATH?SATELLITE_MATH.follow(altitude,zoom,local):{radius:R+1+altitude*.05,scale:.45,distance:16*zoom,near:.1,ahead:.65};
+    if(local&&stage.clientWidth<=680)follow.distance*=1.55;
+    aircraft.position.copy(frame.up).multiplyScalar(view==='globe'?R+1+altitude*.05:follow.radius);
+    aircraft.quaternion.copy(frame.quaternion); aircraft.scale.setScalar(view === 'globe' ? .74 : follow.scale);
+    const near=view==='follow'?follow.near:.1;if(camera.near!==near){camera.near=near;camera.updateProjectionMatrix()}
+    clouds.visible=layers.clouds&&!!cloudMap&&!local;
+    routeGroup.visible=markers.visible=layers.route&&!local;
     updateTrails(s,positionProgress);
     completedLine.geometry.setDrawRange(0,Math.max(1,Math.floor(positionProgress*240)+1));
     lat = Math.asin(frame.up.y)*180/Math.PI; lon = Math.atan2(-frame.up.z,frame.up.x)*180/Math.PI;
@@ -319,10 +421,10 @@ window.FLIGHT_MATH={airports,vector,coordinates,pointAt,progress,distance,altitu
     const lightDirection = frame.up.clone().multiplyScalar(160).addScaledVector(frame.right,100).addScaledVector(frame.forward,70);
     sun.position.copy(lightDirection);
     if (view === 'follow') {
-      const az = yaw, el = Math.max(.42,Math.min(1.5,1.02+pitch)), d = 16*zoom;
+      const az = yaw, el = Math.max(.42,Math.min(1.5,1.02+pitch)), d = follow.distance;
       const tangent = frame.forward.clone().multiplyScalar(-Math.cos(az)).addScaledVector(frame.right,Math.sin(az));
       camera.position.copy(aircraft.position).addScaledVector(frame.up,Math.sin(el)*d).addScaledVector(tangent,Math.cos(el)*d);
-      camera.up.copy(frame.forward); camera.lookAt(aircraft.position.clone().addScaledVector(frame.forward,.65));
+      camera.up.copy(frame.forward); camera.lookAt(aircraft.position.clone().addScaledVector(frame.forward,follow.ahead));
     } else {
       const center = point(s,.5), north = new T.Vector3(0,1,0).addScaledVector(center,-center.y).normalize();
       if (north.lengthSq() < 1e-9) north.set(1,0,0);
@@ -334,6 +436,7 @@ window.FLIGHT_MATH={airports,vector,coordinates,pointAt,progress,distance,altitu
       const routeDistance = (R+2)*1.12/(Math.max(.04,Math.cos(totalDistance/6371/2))*.86);
       camera.position.copy(orbit).multiplyScalar(Math.max(320,fitDistance,routeDistance)*zoom); camera.up.copy(north); camera.lookAt(0,0,0);
     }
+    if(satellite)satellite.update({view,camera,lat,lon,state:s,aircraft,visible:layers.earth});
     return { s, frame };
   }
   function resize() {
@@ -358,7 +461,7 @@ window.FLIGHT_MATH={airports,vector,coordinates,pointAt,progress,distance,altitu
     if (mode !== 'follow' && mode !== 'globe') return;
     view = mode; yaw = pitch = 0; zoom = 1;
     for (const id of ['followView','globeView']) { const el = $(id); if (el) el.setAttribute('aria-pressed',String(id === view+'View')); }
-    text('worldHint', view === 'follow' ? 'Following your flight · drag to orbit · scroll or pinch to zoom' : 'Route overview · drag to orbit · scroll or pinch to zoom');
+    text('worldHint', view === 'follow' ? 'Local flight view · drag to orbit · scroll or pinch to zoom' : 'Route overview · drag to orbit · scroll or pinch to zoom');
     draw();
   }
   for (const mode of ['follow','globe']) { const el = $(mode+'View'); if (el) el.addEventListener('click',() => setView(mode)); }

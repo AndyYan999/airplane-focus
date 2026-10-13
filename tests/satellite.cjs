@@ -1,0 +1,15 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');const path=require('node:path');
+function math(){const p=path.join(__dirname,'../src/satellite-math.js');assert.ok(fs.existsSync(p),'satellite tile mathematics must exist');const ctx={window:{}};vm.runInNewContext(fs.readFileSync(p,'utf8'),ctx);return ctx.window.SATELLITE_MATH;}
+test('Web Mercator matches the verified Shenzhen airport Sentinel tile',()=>{const m=math();const p=m.tile(22.6393,113.8107,14);assert.equal(p.x,13371);assert.equal(p.y,7133);assert.equal(m.tile(0,0,0).x,0);assert.equal(m.tile(0,0,0).y,0);const b=m.bounds(p.x,p.y,14);assert.ok(b.west<113.8107&&b.east>113.8107);assert.ok(b.south<22.6393&&b.north>22.6393);});
+
+test('tile plans are bounded and wrap at the date line',()=>{const m=math();assert.equal(typeof m.plan,'function');const p=m.plan({west:179.97,east:180.03,south:22.55,north:22.7});assert.ok(p.tiles.length<=64);assert.ok(p.tiles.some(t=>t.x<2));assert.ok(p.tiles.every(t=>t.x>=0&&t.x<2**p.zoom));assert.ok(p.zoom<=14);});
+
+test('close-flight camera is regional, not hundreds of kilometres above the airplane',()=>{const m=math();assert.equal(typeof m.follow,'function');const p=m.follow(11,1,true);assert.ok(p.distance<.1);assert.ok(p.near<p.distance/10);assert.ok(p.scale<.01);assert.ok(Math.abs((p.radius-100)*63.71-11.8)<.1);assert.equal(m.follow(11,1,false).distance,16);});
+
+test('Sentinel level fourteen supplies roughly 9-metre pixels at Shenzhen',()=>{const m=math();assert.equal(typeof m.meters,'function');assert.ok(Math.abs(m.meters(22.6393,14)-8.8184)<.001);});
+
+test('a local detail ring requests a bounded five-by-five native-resolution patch',()=>{const m=math();assert.equal(typeof m.detail,'function');const p=m.detail(22.6393,113.8107);assert.equal(p.length,25);assert.ok(p.some(t=>t.x===13371&&t.y===7133));assert.ok(m.detail(0,179.99).every(t=>t.x>=0&&t.x<16384));});
+
+test('retired queued imagery cannot be revived by a stale network queue entry',()=>{const source=fs.readFileSync(path.join(__dirname,'../src/satellite.js'),'utf8');const start=source.indexOf(' function disposeEntry('),end=source.indexOf(' function trim()',start);assert.ok(start>=0&&end>start);const item={status:'queued'};vm.runInNewContext(source.slice(start,end)+';disposeEntry(item)',{item});assert.equal(item.status,'disposed');});
+
+test('retry removes failed tile entries but keeps already loaded imagery',()=>{const source=fs.readFileSync(path.join(__dirname,'../src/satellite.js'),'utf8');const start=source.indexOf(' function retryFailed('),end=source.indexOf(' function setEnabled(',start);assert.ok(start>=0&&end>start,'retry behavior exists');const cache=new Map([['bad',{status:'failed'}],['waiting',{status:'queued'}],['good',{status:'ready'}]]);vm.runInNewContext(source.slice(start,end)+';retryFailed()',{cache});assert.equal(cache.has('bad'),false);assert.equal(cache.has('waiting'),false);assert.equal(cache.has('good'),true);});

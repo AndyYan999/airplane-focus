@@ -192,15 +192,17 @@
   function updateTrails(s, progress) {
     contrails.visible = layers.plane && (s.status === 'running' || s.status === 'paused') && progress > .003 && progress < .999;
     if (!contrails.visible) { contrailSamples = 0; return; }
-    const key = routeKey+':'+progress.toFixed(7)+':'+view;
+    const key = routeKey+':'+progress.toFixed(7)+':'+view+':'+(satellite&&satellite.localView);
     contrailSamples = (trailSegments+1)*2;
     if (key === trailKey) return; trailKey = key;
-    const span = Math.min(progress,.075), visualScale = view === 'globe' ? .74 : .45;
+    const local=view==='follow'&&satellite&&satellite.localView;
+    const span = Math.min(progress,local?Math.min(.075,12/Math.max(1,totalDistance)):.075), visualScale = view === 'globe' ? .74 : local?.0025:.45;
     for (let i = 0; i <= trailSegments; i++) {
       const fraction = i/trailSegments, t = progress-span*(1-fraction), f = flightFrame(s,t);
       const math = window.FLIGHT_MATH, height = math ? math.altitude(t) : 11;
-      const center = f.up.clone().multiplyScalar(R+1+height*.05).addScaledVector(f.forward,-visualScale*.95);
-      const width = .02+(1-fraction)*.14;
+      const radius=local?R+.0125+height*R/6371:R+1+height*.05;
+      const center = f.up.clone().multiplyScalar(radius).addScaledVector(f.forward,-visualScale*.95);
+      const width = local?.00005+(1-fraction)*.0006:.02+(1-fraction)*.14;
       for (const mesh of trailMeshes) {
         const pos = mesh.geometry.attributes.position;
         const middle = center.clone().addScaledVector(f.right,mesh.userData.side*visualScale*1.65);
@@ -213,6 +215,7 @@
   }
   let view = 'follow', lastTheme = '', drawn = 0, positionProgress = 0, altitude = 0, lat = 0, lon = 0;
   let lastLabel = 0, lastLabelKey = '', yaw = 0, pitch = 0, zoom = 1;
+  const satellite=window.createSatelliteLayer?window.createSatelliteLayer(T,scene,renderer,()=>draw()):null;
   function text(id, value) { const el = $(id); if (el && el.textContent !== value) el.textContent = value; }
   function updateFlight(now) {
     const s = stateNow(), math = window.FLIGHT_MATH;
@@ -222,8 +225,14 @@
     altitude = Math.max(0,math ? math.altitude(positionProgress) : 11*Math.min(1,positionProgress/.08,(1-positionProgress)/.12));
     const frame = flightFrame(s,positionProgress);
     // Plane size and clearance are intentionally illustrative, not geospatial scale.
-    aircraft.position.copy(frame.up).multiplyScalar(R + 1.0 + altitude*.05);
-    aircraft.quaternion.copy(frame.quaternion); aircraft.scale.setScalar(view === 'globe' ? .74 : .45);
+    const local=view==='follow'&&satellite&&satellite.localView;
+    const follow=window.SATELLITE_MATH?SATELLITE_MATH.follow(altitude,zoom,local):{radius:R+1+altitude*.05,scale:.45,distance:16*zoom,near:.1,ahead:.65};
+    if(local&&stage.clientWidth<=680)follow.distance*=1.55;
+    aircraft.position.copy(frame.up).multiplyScalar(view==='globe'?R+1+altitude*.05:follow.radius);
+    aircraft.quaternion.copy(frame.quaternion); aircraft.scale.setScalar(view === 'globe' ? .74 : follow.scale);
+    const near=view==='follow'?follow.near:.1;if(camera.near!==near){camera.near=near;camera.updateProjectionMatrix()}
+    clouds.visible=layers.clouds&&!!cloudMap&&!local;
+    routeGroup.visible=markers.visible=layers.route&&!local;
     updateTrails(s,positionProgress);
     completedLine.geometry.setDrawRange(0,Math.max(1,Math.floor(positionProgress*240)+1));
     lat = Math.asin(frame.up.y)*180/Math.PI; lon = Math.atan2(-frame.up.z,frame.up.x)*180/Math.PI;
@@ -244,10 +253,10 @@
     const lightDirection = frame.up.clone().multiplyScalar(160).addScaledVector(frame.right,100).addScaledVector(frame.forward,70);
     sun.position.copy(lightDirection);
     if (view === 'follow') {
-      const az = yaw, el = Math.max(.42,Math.min(1.5,1.02+pitch)), d = 16*zoom;
+      const az = yaw, el = Math.max(.42,Math.min(1.5,1.02+pitch)), d = follow.distance;
       const tangent = frame.forward.clone().multiplyScalar(-Math.cos(az)).addScaledVector(frame.right,Math.sin(az));
       camera.position.copy(aircraft.position).addScaledVector(frame.up,Math.sin(el)*d).addScaledVector(tangent,Math.cos(el)*d);
-      camera.up.copy(frame.forward); camera.lookAt(aircraft.position.clone().addScaledVector(frame.forward,.65));
+      camera.up.copy(frame.forward); camera.lookAt(aircraft.position.clone().addScaledVector(frame.forward,follow.ahead));
     } else {
       const center = point(s,.5), north = new T.Vector3(0,1,0).addScaledVector(center,-center.y).normalize();
       if (north.lengthSq() < 1e-9) north.set(1,0,0);
@@ -259,6 +268,7 @@
       const routeDistance = (R+2)*1.12/(Math.max(.04,Math.cos(totalDistance/6371/2))*.86);
       camera.position.copy(orbit).multiplyScalar(Math.max(320,fitDistance,routeDistance)*zoom); camera.up.copy(north); camera.lookAt(0,0,0);
     }
+    if(satellite)satellite.update({view,camera,lat,lon,state:s,aircraft,visible:layers.earth});
     return { s, frame };
   }
   function resize() {
@@ -283,7 +293,7 @@
     if (mode !== 'follow' && mode !== 'globe') return;
     view = mode; yaw = pitch = 0; zoom = 1;
     for (const id of ['followView','globeView']) { const el = $(id); if (el) el.setAttribute('aria-pressed',String(id === view+'View')); }
-    text('worldHint', view === 'follow' ? 'Following your flight · drag to orbit · scroll or pinch to zoom' : 'Route overview · drag to orbit · scroll or pinch to zoom');
+    text('worldHint', view === 'follow' ? 'Local flight view · drag to orbit · scroll or pinch to zoom' : 'Route overview · drag to orbit · scroll or pinch to zoom');
     draw();
   }
   for (const mode of ['follow','globe']) { const el = $(mode+'View'); if (el) el.addEventListener('click',() => setView(mode)); }
