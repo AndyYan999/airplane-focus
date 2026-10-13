@@ -6,8 +6,8 @@
   "matrix_set": "g",
   "tile_pixels": 256,
   "detail_zoom": 14,
-  "maximum_visible_detail_tiles": 25,
-  "maximum_visible_background_tiles": 36,
+  "maximum_visible_detail_tiles": 9,
+  "maximum_visible_background_tiles": 16,
   "cache_limit": 160,
   "concurrent_request_limit": 4,
   "minimum_request_interval_ms": 180,
@@ -16,6 +16,10 @@
   "license_url": "https://cloudless.eox.at/license-non-commercial",
   "required_credit": "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025)",
   "imagery_date": "2025 mosaic; not real-time imagery",
-  "offline_fallback": "Embedded NASA 8K Earth texture",
-  "notes": "Tiles are requested only for the visible virtual flight view. No API key, paid account, bulk prefetch, or device location permission. Attribution remains visible while imagery is displayed."
+  "offline_fallback": "Compact NASA globe in index.html; full 8K NASA globe in offline.html",
+  "notes": "Tiles are requested only for the visible virtual flight view. No API key, paid account, bulk prefetch, or device location permission. Attribution remains visible while imagery is displayed.",
+  "maximum_first_coverage_tiles": 4,
+  "detail_zoom_running": 13,
+  "near_ground_detail_zoom": 14,
+  "retain_ready_tiles_during_refinement": true
 }

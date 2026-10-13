@@ -5,16 +5,16 @@ window.createSatelliteLayer=function(T,scene,renderer,onChange){
  const SOURCE='https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/';
  const group=new T.Group();group.name='satellite-imagery';scene.add(group);
  const cache=new Map(),sphere=new T.Sphere(new T.Vector3(),R),ray=new T.Raycaster(),hit=new T.Vector3();
- let enabled=true,unavailable=false,offline=!navigator.onLine,queue=[],pending=0,totalLoaded=0,failed=0,currentZoom=14,visibleLoaded=0,wanted=new Set(),lastPlan=0,lastRequest=0,pumpTimer=null,lastMode='follow',lastLat=0,lastTheme='day',disposed=false,allowed=true,detailLoaded=0,backgroundZoom=14;
+ let enabled=true,unavailable=false,offline=!navigator.onLine,queue=[],pending=0,totalLoaded=0,failed=0,currentZoom=14,visibleLoaded=0,wanted=new Set(),lastPlan=-Infinity,lastRequest=-Infinity,pumpTimer=null,lastMode='follow',lastLat=0,lastTheme='day',disposed=false,allowed=true,detailLoaded=0,backgroundZoom=14,detailZoom=14,requestedDetailTiles=0,lastBounds=null,finestVisibleZoom=0,startedAt=null,firstGroundMs=null,firstDetailMs=null;
  try{enabled=localStorage.getItem('airspace-hd-satellite')!=='off'}catch(e){}
  function inform(){
   const active=allowed&&enabled&&!offline&&!unavailable&&lastMode==='follow';group.visible=active;
-  visibleLoaded=detailLoaded=0;for(const [key,t] of cache){if(t.mesh){t.mesh.visible=active&&wanted.has(key);if(t.mesh.visible){visibleLoaded++;if(t.z===14)detailLoaded++}}}
+  visibleLoaded=detailLoaded=finestVisibleZoom=0;for(const [key,t] of cache){if(t.mesh){t.mesh.visible=active&&!!lastBounds&&M.intersects(t,lastBounds);if(t.mesh.visible){visibleLoaded++;finestVisibleZoom=Math.max(finestVisibleZoom,t.z);if(t.z===detailZoom&&wanted.has(key))detailLoaded++}}}
   const hasVisible=visibleLoaded>0;
   const credit=$('satelliteCredit');if(credit)credit.hidden=!hasVisible;
   document.body.classList.toggle('satellite-visible',hasVisible);
   const btn=$('satelliteToggle');if(btn){btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'HD satellite · on':'HD satellite · off'}
-  const label=$('satelliteState');let text=!enabled?'Offline Earth texture':lastMode==='globe'?'Global Earth view':offline||unavailable?'Satellite unavailable · offline Earth':hasVisible?'Sentinel-2 · '+M.meters(lastLat,detailLoaded?14:backgroundZoom).toFixed(0)+' m / pixel detail'+(pending?' · loading…':''):'Loading Sentinel-2 imagery…';
+  const label=$('satelliteState');let text=!enabled?'Offline Earth texture':lastMode==='globe'?'Global Earth view':offline||unavailable?'Satellite unavailable · offline Earth':hasVisible?'Sentinel-2 · '+M.meters(lastLat,finestVisibleZoom||backgroundZoom).toFixed(0)+' m / pixel detail'+(pending?' · loading…':''):'Loading Sentinel-2 imagery…';
   if(label&&label.textContent!==text)label.textContent=text;
  }
  function disposeEntry(t){t.status='disposed';if(t.mesh){group.remove(t.mesh);t.mesh.geometry.dispose();t.mesh.material.map.dispose();t.mesh.material.dispose()}if(t.timer)clearTimeout(t.timer)}
@@ -32,7 +32,7 @@ window.createSatelliteLayer=function(T,scene,renderer,onChange){
   t.status='loading';pending++;lastRequest=performance.now();const img=new Image();img.crossOrigin='anonymous';let settled=false;
   function done(ok){if(settled)return;settled=true;clearTimeout(t.timer);pending--;t.status=ok?'ready':'failed';t.used=performance.now();
    if(ok){const tex=new T.Texture(img);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());tex.needsUpdate=true;
-    const material=new T.MeshBasicMaterial({map:tex,color:lastTheme==='night'?0x7191b3:0xffffff,side:T.DoubleSide,toneMapped:false});t.mesh=new T.Mesh(geometry(t),material);t.mesh.name='sentinel-'+t.key;t.mesh.renderOrder=t.z;group.add(t.mesh);totalLoaded++;
+    const material=new T.MeshBasicMaterial({map:tex,color:lastTheme==='night'?0x7191b3:0xffffff,side:T.DoubleSide,toneMapped:false});t.mesh=new T.Mesh(geometry(t),material);t.mesh.name='sentinel-'+t.key;t.mesh.renderOrder=t.z;group.add(t.mesh);totalLoaded++;if(firstGroundMs===null)firstGroundMs=performance.now()-startedAt;if(t.z===detailZoom&&firstDetailMs===null)firstDetailMs=performance.now()-startedAt;
    }else{failed++;if(totalLoaded===0&&failed>=6){unavailable=true;queue=[]}}
    inform();trim();onChange();pump();
   }
@@ -55,24 +55,26 @@ window.createSatelliteLayer=function(T,scene,renderer,onChange){
   b.west-=padLon;b.east+=padLon;b.north=Math.min(85,b.north+padLat);b.south=Math.max(-85,b.south-padLat);
   b.detailLat=latitude;b.detailLon=longitude;if(aircraft){const f=aircraft.position.clone().project(camera);ray.setFromCamera(new T.Vector2(f.x,f.y),camera);if(ray.ray.intersectSphere(sphere,hit)){b.detailLat=Math.asin(hit.y/R)*180/Math.PI;b.detailLon=Math.atan2(-hit.z,hit.x)*180/Math.PI}}return b;
  }
- function update({view,camera,lat,lon,state,aircraft,visible=true}){
+ function update({view,camera,lat,lon,state,aircraft,altitude=11,visible=true}){
   lastMode=view;lastLat=lat;allowed=visible;group.visible=visible&&enabled&&!offline&&!unavailable&&view==='follow';
   if(state.theme!==lastTheme){lastTheme=state.theme;for(const t of cache.values())if(t.mesh)t.mesh.material.color.set(lastTheme==='night'?0x7191b3:0xffffff)}
   if(!group.visible){for(const t of cache.values())if(t.mesh)t.mesh.visible=false;inform();group.visible=false;return}
-  const now=performance.now();if(now-lastPlan<250){pump();return}lastPlan=now;
-  const b=footprint(camera,lat,lon,aircraft),plan=M.plan(b,state.status==='running'?13:14,36);backgroundZoom=plan.zoom;
-  const detail=plan.zoom<14?M.detail(b.detailLat??lat,b.detailLon??lon):[];currentZoom=detail.length?14:plan.zoom;
+  const now=performance.now();if(now-lastPlan<250){pump();return}lastPlan=now;if(startedAt===null)startedAt=now;
+  const b=footprint(camera,lat,lon,aircraft);lastBounds=b;detailZoom=state.status==='running'&&altitude>=1?13:14;
+  const plan=M.plan(b,Math.min(detailZoom,13),16);backgroundZoom=plan.zoom;
+  const detail=M.detail(b.detailLat??lat,b.detailLon??lon,detailZoom,1);requestedDetailTiles=detail.length;currentZoom=detailZoom;
   const center=M.tile(lat,lon,plan.zoom);plan.tiles.sort((a,b)=>(a.rawX-center.x)**2+(a.y-center.y)**2-((b.rawX-center.x)**2+(b.y-center.y)**2));
-  const near=M.tile(b.detailLat??lat,b.detailLon??lon,14);detail.sort((a,b)=>(a.rawX-near.x)**2+(a.y-near.y)**2-((b.rawX-near.x)**2+(b.y-near.y)**2));
-  const tiles=[...new Map([...detail,...plan.tiles].map(t=>[t.key,t])).values()];wanted=new Set(tiles.map(t=>t.key));
+  const near=M.tile(b.detailLat??lat,b.detailLon??lon,detailZoom);detail.sort((a,b)=>(a.rawX-near.x)**2+(a.y-near.y)**2-((b.rawX-near.x)**2+(b.y-near.y)**2));
+  const cover=M.plan(b,12,4).tiles;const tiles=[...new Map([...cover,...detail,...plan.tiles].map(t=>[t.key,t])).values()];wanted=new Set(tiles.map(t=>t.key));
   for(const t of tiles){let entry=cache.get(t.key);if(!entry){entry={...t,status:'queued',used:now};cache.set(t.key,entry);queue.push(entry)}else entry.used=now}
+  queue=tiles.map(t=>cache.get(t.key)).filter(t=>t&&t.status==='queued');
   inform();trim();pump();
  }
  function retryFailed(){for(const [key,t] of cache)if(t.status==='failed'||t.status==='queued'){t.status='disposed';cache.delete(key)}}
- function setEnabled(value){enabled=!!value;unavailable=false;failed=0;if(enabled)retryFailed();lastPlan=0;try{localStorage.setItem('airspace-hd-satellite',enabled?'on':'off')}catch(e){}inform();onChange()}
+ function setEnabled(value){enabled=!!value;unavailable=false;failed=0;if(enabled)retryFailed();lastPlan=-Infinity;try{localStorage.setItem('airspace-hd-satellite',enabled?'on':'off')}catch(e){}inform();onChange()}
  const toggle=$('satelliteToggle');if(toggle)toggle.addEventListener('click',()=>setEnabled(!enabled));
- window.addEventListener('offline',()=>{offline=true;inform();onChange()});window.addEventListener('online',()=>{offline=false;unavailable=false;failed=0;retryFailed();lastPlan=0;inform();onChange()});
- document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastPlan=0;onChange();pump()}});
- const api={update,setEnabled,group,get enabled(){return enabled},get localView(){return enabled&&!offline&&!unavailable},get diagnostics(){return {enabled,offline,unavailable,mode:lastMode,zoom:currentZoom,backgroundZoom,detailTiles:detailLoaded,visibleTiles:visibleLoaded,loading:pending,queued:queue.filter(t=>wanted.has(t.key)&&t.status==='queued').length,cacheSize:cache.size,totalLoaded,failed,metersPerPixel:M.meters(lastLat,currentZoom),provider:'EOX Sentinel-2 cloudless 2025',tileUrl:SOURCE}}};
+ window.addEventListener('offline',()=>{offline=true;inform();onChange()});window.addEventListener('online',()=>{offline=false;unavailable=false;failed=0;retryFailed();lastPlan=-Infinity;inform();onChange()});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastPlan=-Infinity;onChange();pump()}});
+ const api={update,setEnabled,group,get enabled(){return enabled},get localView(){return enabled&&!offline&&!unavailable},get diagnostics(){return {enabled,offline,unavailable,mode:lastMode,zoom:currentZoom,backgroundZoom,detailZoom,requestedDetailTiles,firstGroundMs,firstDetailMs,detailTiles:detailLoaded,visibleTiles:visibleLoaded,loading:pending,queued:queue.filter(t=>wanted.has(t.key)&&t.status==='queued').length,cacheSize:cache.size,totalLoaded,failed,metersPerPixel:M.meters(lastLat,currentZoom),provider:'EOX Sentinel-2 cloudless 2025',tileUrl:SOURCE}}};
  window.SATELLITE=api;inform();return api;
 };})();

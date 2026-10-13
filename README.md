@@ -12,6 +12,8 @@ I chose the concept: an airplane-experience focus timer for the web. I then requ
 
 Open `index.html` in a modern browser, or use the website. No installation is required. **HD satellite** streams optional Sentinel-2 imagery from EOX while online; the timer, renderer, cabin sound, and NASA Earth map still work offline. No runtime JavaScript CDN is used.
 
+The website uses compact globe-fallback textures so satellite scenery is not delayed by the old 8MB image block. For the full embedded 8K Earth map, download and open [`offline.html`](https://andyyan999.github.io/airplane-focus/offline.html). Each edition is self-contained; the full-resolution copy does not need its neighboring source files. Both can use optional streamed HD imagery when online.
+
 1. Choose two different airports and enter the task you want to focus on.
 2. Pick 1–240 minutes, or a 25/50/90 minute preset, then board.
 3. **Bird’s-eye** now uses a local flight camera and streamed satellite scenery, not a magnified whole-Earth image. Switch to **Earth view** for the globe and route. Drag to orbit, scroll/pinch to zoom, and use recenter to restore the view. Toggle **HD satellite** off to use the embedded offline map.
@@ -36,7 +38,7 @@ Session state, selected theme, volume, satellite preference, and flight log are 
 
 ## Development
 
-The deliverable is one generated `index.html`. Edit the smaller sources, not the generated output:
+The build produces a lightweight `index.html` for the website and a full-resolution `offline.html` for downloading. Both are standalone HTML files. Edit the smaller sources, not the generated output:
 
 - `src/template.html`: timer and layout markup
 - `src/immersive.css`: full-screen flight-deck layout
@@ -57,13 +59,15 @@ The 3D upgrade passed six automated route tests and real WebGL browser checks: 4
 
 ## Streamed satellite imagery
 
-The selected free provider is **EOxCloudless / Sentinel-2 cloudless 2025**, not Google Maps. Tiles are reprojected onto the 3D Earth using their real Web Mercator coordinates. A native zoom-14 detail patch near the aircraft covers 25 cells, with a coarser full-viewport background capped at 36 cells. Requests are center-prioritized, limited to four concurrent downloads, and spaced by at least 180ms. An in-memory cache is capped at 160 cells. Earth view does not stream satellite cells. Hidden tabs stop issuing new jobs.
+The selected free provider is **EOxCloudless / Sentinel-2 cloudless 2025**, not Google Maps. Tiles are reprojected onto the 3D Earth using their real Web Mercator coordinates. Broad terrain coverage (at most four cells) loads first. A compact 3×3 detail patch then sharpens the area near the aircraft, followed by the wider background (at most 16 cells). Detail uses zoom 14 when stationary/near the ground and zoom 13 during faster flight above 1 km so streaming can keep up. Ready tiles that still cover the visible area stay displayed while new detail arrives. Requests are reprioritized as the plane moves, limited to four concurrent downloads, and spaced by at least 180ms. An in-memory cache is capped at 160 cells. Earth view does not stream satellite cells. Hidden tabs stop issuing new jobs.
 
 The tile grid is roughly 9–10 metres per pixel at the example flight locations. This reveals roads, runway markings, building blocks, and land-use detail; it is not Google’s sub-metre aerial imagery, street view, or 3D buildings. Imagery is a 2025 mosaic, not live weather or real-time photos. Ocean imagery may be less detailed than land. The aircraft remains enlarged for visibility, even in the local view.
 
 EOX explicitly permits direct WMTS/WMS integration for **non-commercial** use with attribution under **CC BY-NC-SA 4.0** for 2025 imagery. The required linked attribution stays visible beside the map whenever imagery is displayed. Do not remove it or monetize this imagery-based version without obtaining an appropriate commercial license. See [EOX non-commercial terms](https://cloudless.eox.at/license-non-commercial); provenance and limits are recorded in `assets/satellite-provider.json`.
 
-Verification of this upgrade: 15 automated tests passed. Actual browser requests loaded 25 native-detail cells plus a 16-cell background with zero image failures; the default Shenzhen view reported about 8.8 m per tile pixel. Hiding the imagery changed 764,361 rendered pixels, verifying that satellite data was actually painted. Offline simulation switched to the embedded map and returned online without losing the paused session. Native tiles, globe switching, texture-only mode, pause behavior, and a 390px mobile canvas were exercised without JavaScript errors.
+Verification of this upgrade: 23 automated tests passed, including a distribution test that keeps the website below 2MB while checking that the offline copy embeds the exact full-resolution 8K image. Actual browser requests loaded 25 native-detail cells plus a 16-cell background with zero image failures; the default Shenzhen view reported about 8.8 m per tile pixel. Hiding the imagery changed 764,361 rendered pixels, verifying that satellite data was actually painted. Offline simulation switched to the embedded map and returned online without losing the paused session. Native tiles, globe switching, texture-only mode, pause behavior, and a 390px mobile canvas were exercised without JavaScript errors.
+
+Latest loading check: in an isolated cold-browser session, first satellite terrain appeared 2.47 seconds after imagery scheduling and first sharp detail at 2.73 seconds. The initial viewport used 27 requests, with no image failures or JavaScript errors. Regression tests cover the first-frame throttle bug, coverage-first order, retained textures, adaptive nine-cell detail, and reprioritization after movement. Network/server latency still affects arrival time. The website is about 1.59 MB rather than the previous 8.18 MB; the full 8K offline copy remains available.
 
 ## Third-party credits
 

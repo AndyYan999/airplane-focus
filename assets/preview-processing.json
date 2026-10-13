@@ -1,0 +1,34 @@
+[
+  {
+    "file": "earth-preview.webp",
+    "derived_from": "earth.webp",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 283528,
+    "purpose": "small embedded globe fallback for website startup; detailed flight view uses streamed Sentinel tiles"
+  },
+  {
+    "file": "normal-preview.jpg",
+    "derived_from": "normal.jpg",
+    "width": 512,
+    "height": 256,
+    "bytes": 12536,
+    "purpose": "small embedded globe fallback for website startup; detailed flight view uses streamed Sentinel tiles"
+  },
+  {
+    "file": "specular-preview.jpg",
+    "derived_from": "specular.jpg",
+    "width": 512,
+    "height": 256,
+    "bytes": 24826,
+    "purpose": "small embedded globe fallback for website startup; detailed flight view uses streamed Sentinel tiles"
+  },
+  {
+    "file": "clouds-preview.webp",
+    "derived_from": "clouds.png",
+    "width": 1024,
+    "height": 512,
+    "bytes": 310088,
+    "purpose": "small embedded globe fallback for website startup; detailed flight view uses streamed Sentinel tiles"
+  }
+]

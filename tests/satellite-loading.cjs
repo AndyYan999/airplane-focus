@@ -1,0 +1,10 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const harness=require('./helpers/satellite-harness.cjs');
+test('first visible frame starts imagery even before performance clock reaches 250ms',()=>{const h=harness();h.update();assert.ok(h.images.length>0,'initial frame must schedule a tile immediately');});
+
+test('broad terrain is requested before the high-detail patch',()=>{const h=harness();h.update();const z=Number(h.images[0].url.split('/g/')[1].split('/')[0]);assert.ok(z<=12,'first request must cover broad terrain, not wait behind 25 detail cells');});
+
+test('fast-moving flights use nine detail cells rather than a twenty-five-cell backlog',()=>{const h=harness();h.update({state:{status:'running',theme:'day'},altitude:11});assert.equal(h.api.diagnostics.detailZoom,13);assert.equal(h.api.diagnostics.requestedDetailTiles,9);});
+
+test('loaded detail remains visible while replacement levels are loading',()=>{const h=harness();h.update();for(let i=0;i<5;i++){while(h.images.length<=i)h.advance(180);h.finish(i);h.advance(180)}const old=h.api.group.children.find(m=>m.name.startsWith('sentinel-14/'));assert.ok(old);h.advance(300);h.update({state:{status:'running',theme:'day'},altitude:11});assert.equal(old.visible,true,'ready geographic texture must not disappear merely because requested LOD changed');});
+
+test('new center requests supersede stale edge requests when the plane moves',()=>{const h=harness();h.update();for(let i=0;i<3;i++)h.advance(180);const angle=.0008,axis=new h.camera.position.constructor(0,1,0);h.camera.position.applyAxisAngle(axis,angle);h.aircraft.position.applyAxisAngle(axis,angle);h.camera.lookAt(h.aircraft.position);h.advance(300);h.update({lon:angle*180/Math.PI});h.finish(0);const target=h.ctx.window.SATELLITE_MATH.tile(0,angle*180/Math.PI,14);for(let i=4;i<16;i++){while(h.images.length<=i)h.advance(180);const parts=h.images[i].url.split('/g/')[1].split('/');if(Number(parts[0])===14){assert.equal(Number(parts[2].split('.')[0]),target.x,'first detail after coverage must be the new center, not an old edge');return}h.finish(i);h.advance(180)}assert.fail('detail request never started');});

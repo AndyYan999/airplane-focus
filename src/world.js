@@ -268,7 +268,7 @@
       const routeDistance = (R+2)*1.12/(Math.max(.04,Math.cos(totalDistance/6371/2))*.86);
       camera.position.copy(orbit).multiplyScalar(Math.max(320,fitDistance,routeDistance)*zoom); camera.up.copy(north); camera.lookAt(0,0,0);
     }
-    if(satellite)satellite.update({view,camera,lat,lon,state:s,aircraft,visible:layers.earth});
+    if(satellite)satellite.update({view,camera,lat,lon,state:s,aircraft,altitude,visible:layers.earth});
     return { s, frame };
   }
   function resize() {
